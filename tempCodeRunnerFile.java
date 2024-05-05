@@ -1,0 +1,1 @@
+panel.add(temp2);
