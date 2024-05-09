@@ -38,21 +38,26 @@ public class DrawBoard extends JFrame {
         }
     }
 
-    ArrayList<LabelCoord> labels = new ArrayList<>();
-    int labelIndex;
+    private ArrayList<LabelCoord> labels = new ArrayList<>();
+    private int labelIndex;
     private int WIDTH = 640;
     private int HEIGHT = 640;
     private Board board;
     private boolean valid;
-    JPanel panel;
-    LabelCoord selectedLabel;
-    Point[][] gridPositions;
-    Point prevPt = null;
-    Point currPt = null;
-    Point imageCorner = null;
-    Point lastPosition = null;
+    
+    private JPanel panel;
+    private LabelCoord selectedLabel;
+    private Point[][] gridPositions;
+    private Point prevPt = null;
+    private Point currPt = null;
+    private Point imageCorner = null;
+    private Point lastPosition = null;
     // private DrawPanel panel = null;
 
+    /**
+     * Constructor of the DrawBoard class.
+     * @param board
+     */
     public DrawBoard(Board board) {
 
         this.pack();
@@ -60,6 +65,8 @@ public class DrawBoard extends JFrame {
         int addedWidth = insets.left + insets.right;
         int addedHeight = insets.top + insets.bottom;
 
+        this.setIconImage(new ImageIcon("images/dark_king.png").getImage());
+        this.setTitle("Chess Game");
         this.board = board;
         this.setResizable(false);
         this.setSize(new Dimension(WIDTH + addedWidth, HEIGHT + addedHeight));
@@ -67,6 +74,9 @@ public class DrawBoard extends JFrame {
         this.add(panel());
     }
 
+    /**
+     * This function when called resets some variables for reuse.
+     */
     private void resetVariables() {
         selectedLabel = null; 
         prevPt = null;
@@ -91,12 +101,15 @@ public class DrawBoard extends JFrame {
         Square[][] playingBoard = board.getBoard();
         gridPositions = new Point[8][8];
         
+        // Define the center of each board square.
         for(int i = 0; i < gridPositions.length; i++) {
             for(int j = 0; j < gridPositions[0].length; j++) {
                 gridPositions[i][j] = new Point(i*length + length/2, j*length + length/2);
             }
         }
 
+        // Draw the labels for each piece on the board and store them in an array list
+        // so that we can change them later on.
         for(int i = 0; i < playingBoard.length; i++) {
             for(int j = 0; j < playingBoard[0].length; j++) {
                 if(playingBoard[j][i].getPiece() == null) {
@@ -115,6 +128,7 @@ public class DrawBoard extends JFrame {
             }
         }
         
+        // Draw the board colors
         for(int i = 0; i < 8; i++) {
             for(int j = 0; j < 8; j++) {
                 JLabel temp = new JLabel();
@@ -135,6 +149,12 @@ public class DrawBoard extends JFrame {
         return panel;
     }
 
+    /**
+     * Given a LabelCoord object and a point p, set the location
+     * of the label in that LabelCoord to the point p.
+     * @param label
+     * @param p
+     */
     public void drawLabel(LabelCoord label, Point p) {
         label.getLabel().setLocation((int)p.getX(), (int)p.getY());
     }
@@ -161,6 +181,11 @@ public class DrawBoard extends JFrame {
             }
         }
 
+        // ------------------------------------ ERROR ---------------------------------------
+        // There seems to be an issue when capturing a piece in the right 3 coloumns with the light pieces.
+        // And the bottom left squares with the dark pieces.
+
+
         // Check if the piece being dragged collides with a nother piece when a move is made.
         int index = 0;
         boolean lastPos = false;
@@ -177,6 +202,14 @@ public class DrawBoard extends JFrame {
                     );
                     labels.get(index).getLabel().setVisible(false);
                     labels.remove(index);
+                    
+                    // Light Pieces are stored in an index in the ArrayList that is larger than the
+                    // Dark Pieces, thus when we capture a dark piece with a light piece, we can
+                    // decrement the labelIndex since the removed piece is before the held piece,
+                    // while when you capture a light piece with a dark piece, the labelIndex doesn't
+                    // have to be changed since the removed index is after the dark piece.
+                    if(index < labelIndex) {labelIndex--;}
+                    else {/* Do Nothing */}
                     break;
                 }
                 else if(tempLabel.getPiece().getColor().compareTo(label.getPiece().getColor()) == 0) {
