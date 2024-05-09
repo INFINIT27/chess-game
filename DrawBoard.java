@@ -1,4 +1,3 @@
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -7,10 +6,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class DrawBoard extends JFrame {
@@ -50,7 +45,7 @@ public class DrawBoard extends JFrame {
     private Board board;
     private boolean valid;
     JPanel panel;
-    JLabel selectedLabel;
+    LabelCoord selectedLabel;
     Point[][] gridPositions;
     Point prevPt = null;
     Point currPt = null;
@@ -70,6 +65,14 @@ public class DrawBoard extends JFrame {
         this.setSize(new Dimension(WIDTH + addedWidth, HEIGHT + addedHeight));
         this.setLayout(null);
         this.add(panel());
+    }
+
+    private void resetVariables() {
+        selectedLabel = null; 
+        prevPt = null;
+        currPt = null;
+        imageCorner = null;
+        lastPosition = null;
     }
 
     public JPanel panel() {
@@ -132,8 +135,8 @@ public class DrawBoard extends JFrame {
         return panel;
     }
 
-    public void drawLabel(JLabel label, Point p) {
-        label.setLocation((int)p.getX(), (int)p.getY());
+    public void drawLabel(LabelCoord label, Point p) {
+        label.getLabel().setLocation((int)p.getX(), (int)p.getY());
     }
 
     /**
@@ -141,8 +144,9 @@ public class DrawBoard extends JFrame {
      * @param label
      * @param p
      */
-    public void drawExactLocation(JLabel label, Point p) {
-        int length = 20000;
+    public void drawExactLocation(LabelCoord label, Point p) {
+        System.out.println(labels.size());
+        int length = Integer.MAX_VALUE;
         Point curr = null;
         for(int i = 0; i < gridPositions.length; i++) {
             for(int j = 0; j < gridPositions[0].length; j++) {
@@ -158,22 +162,43 @@ public class DrawBoard extends JFrame {
         }
 
         // Check if the piece being dragged collides with a nother piece when a move is made.
+        int index = 0;
+        boolean lastPos = false;
         for(LabelCoord tempLabel : labels) {
-            if( // If the label 
+            if( // If the label selected lands on another label/piece
                 tempLabel.getPoint().getX() + 30 == curr.getX() &&
                 tempLabel.getPoint().getY() + 30 == curr.getY()
-            ) {
-                if(tempLabel.getPiece().getColor().compareTo("Dark") == 0){
-                    tempLabel.getLabel().setVisible(false);
-                    // labels.remove(tempLabel); ------------- CONTINUE HERE -------------
-                    System.out.println("Here!");
+            ) { // Check if the piece selected and the piece landing on have the same or different colors. 
+                if(tempLabel.getPiece().getColor().compareTo(label.getPiece().getColor()) != 0){
+                    System.out.println(
+                        "The Piece being removed\n" + 
+                        "Piece Name: " + tempLabel.getPiece().getPieceName() + "\n" +
+                        "Piece Color: " + tempLabel.getPiece().getColor()
+                    );
+                    labels.get(index).getLabel().setVisible(false);
+                    labels.remove(index);
                     break;
                 }
+                else if(tempLabel.getPiece().getColor().compareTo(label.getPiece().getColor()) == 0) {
+                    lastPos = true;
+                }
+            }
+            index++;
+        }
+        
+        // Update both the label passed to the method as well as the label in the ArrayList
+        if(!valid) {/* Do nothing */}
+        else {
+            if(lastPos) { // Check if the piece is attempting to take a piece of the same color
+                label.getLabel().setLocation((int)lastPosition.getX() - 30, (int)lastPosition.getY() - 30);
+                labels.get(labelIndex).setPoint(new Point((int)lastPosition.getX() - 30, (int)lastPosition.getY() - 30));
+            }
+            else {
+                label.getLabel().setLocation((int)curr.getX() - 30, (int)curr.getY() - 30);
+                labels.get(labelIndex).setPoint(new Point((int)curr.getX() - 30, (int)curr.getY() - 30));
             }
         }
-        label.setLocation((int)curr.getX() - 30, (int)curr.getY() - 30);
-        if(!valid) {/* Do nothing */}
-        else labels.get(labelIndex).setPoint(new Point((int)curr.getX() - 30, (int)curr.getY() - 30));
+        resetVariables();
     }
 
     /**
@@ -215,24 +240,25 @@ public class DrawBoard extends JFrame {
                     label.getPoint().getX() == (closestGridPosition.getX()-30) &&
                     label.getPoint().getY() == (closestGridPosition.getY()-30)
                 ) {
-                    selectedLabel = label.getLabel();
+                    selectedLabel = label;
                     imageCorner = label.getPoint();
                     valid = true;
+                    System.out.println("Curr Piece Index: " + labelIndex);
                     break;
                 }
                 else {
                     selectedLabel = null;
                     imageCorner = null;
                     valid = false;
-                    System.out.println("You have not picked a valid piece!");
+                    labelIndex++;
                 }
-                labelIndex++;
             }
         }
 
         
         public void mouseReleased(MouseEvent e) {
-            drawExactLocation(selectedLabel, prevPt);
+            if(valid) drawExactLocation(selectedLabel, prevPt);
+            else /* Do Nothing */;
         }
         
     }
@@ -240,14 +266,18 @@ public class DrawBoard extends JFrame {
     private class DragListener extends MouseMotionAdapter {
         
         public void mouseDragged(MouseEvent e) {
-            currPt = e.getPoint();
-            imageCorner.translate(
-                (int)(currPt.getX()-prevPt.getX()),
-                (int)(currPt.getY()-prevPt.getY())
-            );
-            prevPt = currPt;
-            drawLabel(selectedLabel, currPt);
+            if(valid){
+                currPt = e.getPoint();
+                imageCorner.translate(
+                    (int)(currPt.getX()-prevPt.getX()),
+                    (int)(currPt.getY()-prevPt.getY())
+                );
+                prevPt = currPt;
+                drawLabel(selectedLabel, currPt);
+            }
+            else {
+                /* Do Nothing */
+            }
         }
-        
     }
 }
