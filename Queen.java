@@ -3,6 +3,7 @@ public class Queen extends Piece {
     private final String name = "Queen";
     private String path;
     private String color;
+    private final int pieceValue = 9;
 
     public Queen(int i, int j, String color) {
         super(i, j);
@@ -36,6 +37,10 @@ public class Queen extends Piece {
 
     public String getPath() {
         return this.path;
+    }
+
+    public int getPieceValue() {
+        return this.pieceValue;
     }
 }
 

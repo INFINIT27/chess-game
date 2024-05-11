@@ -3,6 +3,7 @@ public class Rook extends Piece {
     private final String name = "Rook";
     private String path;
     private String color;
+    private final int pieceValue = 5;
 
     public Rook(int i, int j, String color) {
         super(i, j);
@@ -36,5 +37,9 @@ public class Rook extends Piece {
 
     public String getPath() {
         return this.path;
+    }
+
+    public int getPieceValue() {
+        return this.pieceValue;
     }
 }

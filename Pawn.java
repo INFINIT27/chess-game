@@ -3,6 +3,7 @@ public class Pawn extends Piece {
     private final String name = "Pawn";
     private String path;
     private String color;
+    private final int pieceValue = 1;
 
     public Pawn(int i, int j, String color) {
         super(i, j);
@@ -36,6 +37,10 @@ public class Pawn extends Piece {
 
     public String getPath() {
         return this.path;
+    }
+
+    public int getPieceValue() {
+        return this.pieceValue;
     }
 }
 

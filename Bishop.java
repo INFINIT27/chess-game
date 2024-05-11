@@ -3,6 +3,7 @@ public class Bishop extends Piece {
     private final String name = "Bishop";
     private String path;
     private String color;
+    private final int pieceValue = 3;
 
     public Bishop(int i, int j, String color) {
         super(i, j);
@@ -36,5 +37,9 @@ public class Bishop extends Piece {
 
     public String getPath() {
         return this.path;
+    }
+
+    public int getPieceValue() {
+        return this.pieceValue;
     }
 }

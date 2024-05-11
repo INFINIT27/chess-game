@@ -3,6 +3,7 @@ public class King extends Piece {
     private final String name = "King";
     private String path;
     private String color;
+    private final int pieceValue = 200;
 
     public King(int i, int j, String color) {
         super(i, j);
@@ -36,5 +37,9 @@ public class King extends Piece {
 
     public String getPath() {
         return this.path;
+    }
+    
+    public int getPieceValue() {
+        return this.pieceValue;
     }
 }

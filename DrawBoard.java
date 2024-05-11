@@ -10,6 +10,10 @@ import java.util.ArrayList;
 
 public class DrawBoard extends JFrame {
 
+    /**
+     * Inner class of the DrawBoard class that is used as an object to hold parameters
+     * that will make the changes of the board much easier to implement.
+     */
     private class LabelCoord {
         private JLabel label;
         private Point point;
@@ -48,6 +52,7 @@ public class DrawBoard extends JFrame {
     private JPanel panel;
     private LabelCoord selectedLabel;
     private Point[][] gridPositions;
+    private Square[][] playingBoard;
     private Point prevPt = null;
     private Point currPt = null;
     private Point imageCorner = null;
@@ -85,6 +90,10 @@ public class DrawBoard extends JFrame {
         lastPosition = null;
     }
 
+    /**
+     * Draw the panel with the game going on.
+     * @return
+     */
     public JPanel panel() {
         panel = new JPanel();
         panel.setBounds(0, 0, WIDTH, HEIGHT);
@@ -98,7 +107,7 @@ public class DrawBoard extends JFrame {
         int length = WIDTH / 8;
         boolean flip = true;
 
-        Square[][] playingBoard = board.getBoard();
+        playingBoard = board.getBoard();
         gridPositions = new Point[8][8];
         
         // Define the center of each board square.
@@ -165,7 +174,7 @@ public class DrawBoard extends JFrame {
      * @param p
      */
     public void drawExactLocation(LabelCoord label, Point p) {
-        System.out.println(labels.size());
+        printBoard(label.getPiece());
         int length = Integer.MAX_VALUE;
         Point curr = null;
         for(int i = 0; i < gridPositions.length; i++) {
@@ -180,11 +189,6 @@ public class DrawBoard extends JFrame {
                 }
             }
         }
-
-        // ------------------------------------ ERROR ---------------------------------------
-        // There seems to be an issue when capturing a piece in the right 3 coloumns with the light pieces.
-        // And the bottom left squares with the dark pieces.
-
 
         // Check if the piece being dragged collides with a nother piece when a move is made.
         int index = 0;
@@ -203,11 +207,11 @@ public class DrawBoard extends JFrame {
                     labels.get(index).getLabel().setVisible(false);
                     labels.remove(index);
                     
-                    // Light Pieces are stored in an index in the ArrayList that is larger than the
-                    // Dark Pieces, thus when we capture a dark piece with a light piece, we can
-                    // decrement the labelIndex since the removed piece is before the held piece,
-                    // while when you capture a light piece with a dark piece, the labelIndex doesn't
-                    // have to be changed since the removed index is after the dark piece.
+                    /*
+                     * If the capturedpiece has an index smaller than the piece being used to capture,
+                     * we need to decrement the labelIndex so that when we update it, we update the 
+                     * correct position in the labels ArrayList.
+                     */
                     if(index < labelIndex) {labelIndex--;}
                     else {/* Do Nothing */}
                     break;
@@ -261,6 +265,11 @@ public class DrawBoard extends JFrame {
 
     private class ClickerListener extends MouseAdapter {
 
+        /**
+         * Select the label that the user clicks on, also include logic
+         * to prevent the user from selecting a piece when they are clicking
+         * on an empty square.
+         */
         public void mousePressed(MouseEvent e) {
             
             prevPt = e.getPoint();
@@ -288,7 +297,9 @@ public class DrawBoard extends JFrame {
             }
         }
 
-        
+        /**
+         * When the user releases the mouse, draw the piece on the board that they picked.
+         */
         public void mouseReleased(MouseEvent e) {
             if(valid) drawExactLocation(selectedLabel, prevPt);
             else /* Do Nothing */;
@@ -298,6 +309,10 @@ public class DrawBoard extends JFrame {
 
     private class DragListener extends MouseMotionAdapter {
         
+        /**
+         * Updating the panel with the movement of the label while
+         * the user is dragging it to the square they want to put it in.
+         */
         public void mouseDragged(MouseEvent e) {
             if(valid){
                 currPt = e.getPoint();
@@ -310,6 +325,16 @@ public class DrawBoard extends JFrame {
             }
             else {
                 /* Do Nothing */
+            }
+        }
+    }
+
+    public void printBoard(Piece piece) {
+        for(int i = 0; i < playingBoard.length; i++) {
+            for(int j = 0; j < playingBoard[0].length; j++) {
+                if(playingBoard[i][j].getPiece() == piece) {
+                    System.out.println(i + " " + j);
+                }
             }
         }
     }

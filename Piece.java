@@ -11,6 +11,7 @@ public abstract class Piece {
     public abstract String getPieceName();
     public abstract String getPath();
     public abstract String getColor();
+    public abstract int getPieceValue();
 
     public int getI() {
         return this.i;
